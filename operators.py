@@ -31,7 +31,9 @@ class BO_OT_RefreshModels(bpy.types.Operator):
                 item = context.scene.bo_available_models.add()
                 item.name = name
             if models:
-                context.scene.bo_selected_model = models[0]
+                prefs_model = context.preferences.addons[__package__].preferences.ollama_model
+                selected = prefs_model if prefs_model in models else models[0]
+                context.scene.bo_selected_model = selected
                 self.report({'INFO'}, f"{len(models)} modelos encontrados.")
             else:
                 self.report({'WARNING'}, "Nenhum modelo encontrado.")

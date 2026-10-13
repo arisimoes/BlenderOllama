@@ -21,8 +21,14 @@ class BENDER_OLLAMA_PT_Panel(bpy.types.Panel):
         row = box.row(align=True)
         row.prop(scene, "bo_selected_model", text="")
         row.operator("bo.refresh_models", text="", icon='FILE_REFRESH')
-        if scene.bo_available_models:
-            box.prop_search(scene, "bo_selected_model", scene, "bo_available_models", text="Escolher")
+
+        if len(scene.bo_available_models) == 0:
+            box.label(text="Clique em refresh para listar modelos", icon='INFO')
+        else:
+            row2 = box.row()
+            row2.prop_search(scene, "bo_selected_model", scene, "bo_available_models", text="Escolher")
+            if scene.bo_selected_model:
+                box.label(text=f"Selecionado: {scene.bo_selected_model[:40]}", icon='CHECKMARK')
 
         row = layout.row()
         row.enabled = not scene.bo_is_processing
