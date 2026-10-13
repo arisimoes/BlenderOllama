@@ -77,7 +77,7 @@ class BO_OT_ExecutePrompt(bpy.types.Operator):
             if self._error:
                 raise Exception(self._error)
 
-            utils.execute_code(self._result)
+            utils.execute_code(self._result, context=context)
             self.add_to_history(context, self._prompt, self._result, success=True)
             self.report({'INFO'}, "BenderOllama: Comando executado!")
         except Exception as e:
