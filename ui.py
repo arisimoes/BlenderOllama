@@ -63,6 +63,13 @@ class BENDER_OLLAMA_PT_HistoryPanel(bpy.types.Panel):
             status = "Sucesso" if item.success else "Erro"
             icon = 'CHECKMARK' if item.success else 'ERROR'
             box.label(text=f"Status: {status}", icon=icon)
+            col = box.column(align=True)
+            for line in item.response.splitlines()[:8]:
+                col.label(text=line[:55])
+            if len(item.response.splitlines()) > 8:
+                col.label(text="...")
+            rerun = box.operator("bo.rerun_history_item", text="Reexecutar", icon='FILE_REFRESH')
+            rerun.item_index = idx
 
         layout.separator()
         layout.operator("bo.clear_history", text="Limpar Histórico", icon='TRASH')

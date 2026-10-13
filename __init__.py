@@ -14,6 +14,7 @@ addon_classes = [
     operators.BO_OT_TestConnection,
     operators.BO_OT_RefreshModels,
     operators.BO_OT_ExecutePrompt,
+    operators.BO_OT_RerunHistoryItem,
     operators.BO_OT_ClearHistory,
     operators.BO_OT_OpenPopup,
     ui.BENDER_OLLAMA_PT_Panel,

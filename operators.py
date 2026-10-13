@@ -123,6 +123,34 @@ class BO_OT_ExecutePrompt(bpy.types.Operator):
         item.success = success
 
 
+class BO_OT_RerunHistoryItem(bpy.types.Operator):
+    bl_idname = "bo.rerun_history_item"
+    bl_label = "Reexecutar Item do Histórico"
+    bl_options = {'REGISTER'}
+
+    item_index: bpy.props.IntProperty()
+
+    def execute(self, context):
+        scene = context.scene
+        idx = self.item_index
+        if idx < 0 or idx >= len(scene.bo_history):
+            self.report({'WARNING'}, "Item do histórico não encontrado.")
+            return {'CANCELLED'}
+
+        item = scene.bo_history[idx]
+        context.scene.bo_prompt = item.prompt
+        # Execute saved code directly if present, otherwise replay prompt
+        code = item.response
+        try:
+            utils.execute_code(code, context=context)
+            item.success = True
+            self.report({'INFO'}, "BenderOllama: Comando reexecutado!")
+        except Exception as e:
+            item.success = False
+            self.report({'ERROR'}, f"BenderOllama errou: {e}")
+        return {'FINISHED'}
+
+
 class BO_OT_ClearHistory(bpy.types.Operator):
     bl_idname = "bo.clear_history"
     bl_label = "Limpar Histórico"
@@ -169,7 +197,7 @@ class BO_OT_OpenPopup(bpy.types.Operator):
                 layout.label(text=f"{status}: {item.prompt[:40]}{'...' if len(item.prompt) > 40 else ''}")
 
 
-classes = [BO_OT_TestConnection, BO_OT_RefreshModels, BO_OT_ExecutePrompt, BO_OT_ClearHistory, BO_OT_OpenPopup]
+classes = [BO_OT_TestConnection, BO_OT_RefreshModels, BO_OT_ExecutePrompt, BO_OT_RerunHistoryItem, BO_OT_ClearHistory, BO_OT_OpenPopup]
 
 
 def register():
