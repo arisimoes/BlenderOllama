@@ -42,6 +42,14 @@ def register():
 
     bpy.types.Scene.bo_is_processing = bpy.props.BoolProperty(default=False)
 
+    bpy.types.Scene.bo_progress = bpy.props.FloatProperty(
+        name="Progresso",
+        default=0.0,
+        min=0.0,
+        max=1.0,
+        subtype='FACTOR'
+    )
+
     bpy.types.Scene.bo_available_models = bpy.props.CollectionProperty(
         type=utils.BenderOllamaModelItem
     )
@@ -68,6 +76,7 @@ def unregister():
     del bpy.types.Scene.bo_available_models
     del bpy.types.Scene.bo_available_models_index
     del bpy.types.Scene.bo_selected_model
+    del bpy.types.Scene.bo_progress
 
 
 if __name__ == "__main__":

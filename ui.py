@@ -38,7 +38,7 @@ class BENDER_OLLAMA_PT_Panel(bpy.types.Panel):
             box = layout.box()
             box.alert = True
             box.label(text="⏳ BenderOllama está pensando...", icon='TEMP')
-            box.progress(factor=0.0, text="Aguardando resposta do modelo")
+            box.progress(factor=scene.bo_progress, text="Aguardando resposta do modelo")
             box.label(text="O Blender continua respondendo.", icon='INFO')
 
 

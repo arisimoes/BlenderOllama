@@ -65,6 +65,7 @@ class BO_OT_ExecutePrompt(bpy.types.Operator):
         self._error = None
         self._done = False
         context.scene.bo_is_processing = True
+        context.scene.bo_progress = 0.0
         self.report({'INFO'}, f"BenderOllama processando: {prompt}")
 
         model = context.scene.bo_selected_model or None
@@ -87,7 +88,12 @@ class BO_OT_ExecutePrompt(bpy.types.Operator):
 
     def modal(self, context, event):
         if event.type == 'TIMER':
-            if self._done:
+            # Animate progress bar while waiting
+            if not self._done:
+                context.scene.bo_progress = (context.scene.bo_progress + 0.03) % 1.0
+                for area in context.screen.areas:
+                    area.tag_redraw()
+            else:
                 return self._finish(context)
         return {'PASS_THROUGH'}
 
@@ -98,6 +104,7 @@ class BO_OT_ExecutePrompt(bpy.types.Operator):
             self._timer = None
 
         context.scene.bo_is_processing = False
+        context.scene.bo_progress = 0.0
 
         try:
             if self._error:
