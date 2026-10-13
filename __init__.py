@@ -12,6 +12,7 @@ property_group_classes = [
 addon_classes = [
     preferences.BenderOllamaPreferences,
     operators.BO_OT_TestConnection,
+    operators.BO_OT_RefreshModels,
     operators.BO_OT_ExecutePrompt,
     operators.BO_OT_ClearHistory,
     operators.BO_OT_OpenPopup,
