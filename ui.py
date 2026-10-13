@@ -15,6 +15,14 @@ class BENDER_OLLAMA_PT_Panel(bpy.types.Panel):
         layout.label(text="O que vamos construir, humano?", icon='CONSOLE')
         layout.prop(scene, "bo_prompt", text="")
 
+        # Reference image UI
+        img_box = layout.box()
+        img_box.label(text="Imagem de Referência", icon='IMAGE')
+        row = img_box.row(align=True)
+        row.prop(scene, "bo_image_path", text="")
+        row.operator("bo.paste_image_path", text="", icon='PASTEDOWN')
+        row.operator("bo.clear_image_path", text="", icon='X')
+
         # Model selection UI
         box = layout.box()
         box.label(text="Modelo", icon='PRESET')

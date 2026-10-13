@@ -14,6 +14,8 @@ addon_classes = [
     operators.BO_OT_TestConnection,
     operators.BO_OT_RefreshModels,
     operators.BO_OT_ExecutePrompt,
+    operators.BO_OT_PasteImagePath,
+    operators.BO_OT_ClearImagePath,
     operators.BO_OT_RerunHistoryItem,
     operators.BO_OT_ClearHistory,
     operators.BO_OT_OpenPopup,
@@ -33,6 +35,13 @@ def register():
         name="Prompt",
         description="Digite o comando para a IA local",
         default="Crie um macaco (Suzanne) no centro da cena"
+    )
+
+    bpy.types.Scene.bo_image_path = bpy.props.StringProperty(
+        name="Imagem de Referência",
+        description="Caminho absoluto de uma imagem PNG/JPG para enviar junto ao prompt",
+        default="",
+        subtype='FILE_PATH'
     )
 
     bpy.types.Scene.bo_history = bpy.props.CollectionProperty(
@@ -70,6 +79,7 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     del bpy.types.Scene.bo_prompt
+    del bpy.types.Scene.bo_image_path
     del bpy.types.Scene.bo_history
     del bpy.types.Scene.bo_history_index
     del bpy.types.Scene.bo_is_processing

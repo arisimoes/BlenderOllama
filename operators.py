@@ -3,6 +3,43 @@ import threading
 from . import ollama_client, utils
 
 
+class BO_OT_PasteImagePath(bpy.types.Operator):
+    bl_idname = "bo.paste_image_path"
+    bl_label = "Colar Caminho da Imagem"
+    bl_description = "Cola o caminho absoluto da área de transferência como imagem de referência"
+    bl_options = {'REGISTER'}
+
+    def execute(self, context):
+        try:
+            import subprocess
+            # PowerShell to read clipboard text; fallback gracefully on failure
+            proc = subprocess.run(
+                ["powershell", "-Command", "Get-Clipboard -Raw"],
+                capture_output=True, text=True, check=True
+            )
+            path = proc.stdout.strip().strip('"')
+            if not path:
+                self.report({'WARNING'}, "Área de transferência vazia.")
+                return {'CANCELLED'}
+            context.scene.bo_image_path = path
+            self.report({'INFO'}, f"Caminho colado: {path}")
+        except Exception as e:
+            self.report({'ERROR'}, f"Não foi possível colar: {e}")
+        return {'FINISHED'}
+
+
+class BO_OT_ClearImagePath(bpy.types.Operator):
+    bl_idname = "bo.clear_image_path"
+    bl_label = "Limpar Imagem"
+    bl_description = "Remove a imagem de referência do prompt"
+    bl_options = {'REGISTER'}
+
+    def execute(self, context):
+        context.scene.bo_image_path = ""
+        self.report({'INFO'}, "Imagem de referência removida.")
+        return {'FINISHED'}
+
+
 class BO_OT_TestConnection(bpy.types.Operator):
     bl_idname = "bo.test_connection"
     bl_label = "Testar Conexão com Ollama"
@@ -69,7 +106,8 @@ class BO_OT_ExecutePrompt(bpy.types.Operator):
         self.report({'INFO'}, f"BenderOllama processando: {prompt}")
 
         model = context.scene.bo_selected_model or None
-        self._thread = threading.Thread(target=self._generate_in_thread, args=(prompt, model))
+        image_path = context.scene.bo_image_path or None
+        self._thread = threading.Thread(target=self._generate_in_thread, args=(prompt, model, image_path))
         self._thread.start()
 
         wm = context.window_manager
@@ -78,9 +116,9 @@ class BO_OT_ExecutePrompt(bpy.types.Operator):
 
         return {'RUNNING_MODAL'}
 
-    def _generate_in_thread(self, prompt, model):
+    def _generate_in_thread(self, prompt, model, image_path):
         try:
-            self._result = ollama_client.generate(prompt, model=model)
+            self._result = ollama_client.generate(prompt, model=model, image_path=image_path)
         except Exception as e:
             self._error = str(e)
         finally:
@@ -204,7 +242,7 @@ class BO_OT_OpenPopup(bpy.types.Operator):
                 layout.label(text=f"{status}: {item.prompt[:40]}{'...' if len(item.prompt) > 40 else ''}")
 
 
-classes = [BO_OT_TestConnection, BO_OT_RefreshModels, BO_OT_ExecutePrompt, BO_OT_RerunHistoryItem, BO_OT_ClearHistory, BO_OT_OpenPopup]
+classes = [BO_OT_TestConnection, BO_OT_RefreshModels, BO_OT_ExecutePrompt, BO_OT_PasteImagePath, BO_OT_ClearImagePath, BO_OT_RerunHistoryItem, BO_OT_ClearHistory, BO_OT_OpenPopup]
 
 
 def register():

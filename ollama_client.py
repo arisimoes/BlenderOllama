@@ -1,7 +1,31 @@
 import json
 import urllib.request
 import urllib.error
+import base64
+import pathlib
 import bpy
+
+
+def _image_to_base64(path: str) -> str | None:
+    """Return a base64 data URI for an image file, or None if path is empty/invalid."""
+    if not path:
+        return None
+    p = pathlib.Path(path)
+    if not p.is_file():
+        return None
+    ext = p.suffix.lower().lstrip('.')
+    if ext in ('jpg', 'jpeg'):
+        mime = 'image/jpeg'
+    elif ext == 'png':
+        mime = 'image/png'
+    else:
+        mime = 'image/png'
+    try:
+        data = p.read_bytes()
+        b64 = base64.b64encode(data).decode('utf-8')
+        return f"data:{mime};base64,{b64}"
+    except Exception as e:
+        raise RuntimeError(f"Não foi possível ler a imagem {path}: {e}") from e
 
 
 def get_preferences():
@@ -46,7 +70,7 @@ def _normalize_base_url(url: str) -> str:
     return url.rstrip("/")
 
 
-def generate_ollama(prompt: str, model: str | None = None, system: str | None = None) -> str:
+def generate_ollama(prompt: str, model: str | None = None, system: str | None = None, image_path: str | None = None) -> str:
     prefs = get_preferences()
     url = f"{_normalize_base_url(prefs.base_url)}/api/generate"
 
@@ -57,19 +81,28 @@ def generate_ollama(prompt: str, model: str | None = None, system: str | None = 
         "stream": False,
     }
 
+    image_b64 = _image_to_base64(image_path) if image_path else None
+    if image_b64:
+        payload["images"] = [image_b64]
+
     result = _make_request(url, payload, _default_headers(prefs), prefs.request_timeout)
     return result.get("response", "")
 
 
-def generate_openai(prompt: str, model: str | None = None, system: str | None = None) -> str:
+def generate_openai(prompt: str, model: str | None = None, system: str | None = None, image_path: str | None = None) -> str:
     prefs = get_preferences()
     url = f"{_normalize_base_url(prefs.base_url)}/v1/chat/completions"
+
+    content = [{"type": "text", "text": prompt}]
+    image_b64 = _image_to_base64(image_path) if image_path else None
+    if image_b64:
+        content.append({"type": "image_url", "image_url": {"url": image_b64}})
 
     payload = {
         "model": model or prefs.ollama_model,
         "messages": [
             {"role": "system", "content": system or prefs.system_prompt},
-            {"role": "user", "content": prompt},
+            {"role": "user", "content": content},
         ],
         "temperature": 0.2,
     }
@@ -81,12 +114,12 @@ def generate_openai(prompt: str, model: str | None = None, system: str | None = 
     return choices[0].get("message", {}).get("content", "")
 
 
-def generate(prompt: str, model: str | None = None, system: str | None = None) -> str:
+def generate(prompt: str, model: str | None = None, system: str | None = None, image_path: str | None = None) -> str:
     """Send a generate request to the configured backend and return the response text."""
     prefs = get_preferences()
     if prefs.backend == 'OPENAI':
-        return generate_openai(prompt, model, system)
-    return generate_ollama(prompt, model, system)
+        return generate_openai(prompt, model, system, image_path)
+    return generate_ollama(prompt, model, system, image_path)
 
 
 def list_models() -> list[str]:
