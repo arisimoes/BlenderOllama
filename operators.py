@@ -17,6 +17,29 @@ class BO_OT_TestConnection(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BO_OT_RefreshModels(bpy.types.Operator):
+    bl_idname = "bo.refresh_models"
+    bl_label = "Atualizar Modelos"
+    bl_description = "Busca a lista de modelos disponíveis na API configurada"
+    bl_options = {'REGISTER'}
+
+    def execute(self, context):
+        try:
+            models = ollama_client.list_models()
+            context.scene.bo_available_models.clear()
+            for name in models:
+                item = context.scene.bo_available_models.add()
+                item.name = name
+            if models:
+                context.scene.bo_selected_model = models[0]
+                self.report({'INFO'}, f"{len(models)} modelos encontrados.")
+            else:
+                self.report({'WARNING'}, "Nenhum modelo encontrado.")
+        except Exception as e:
+            self.report({'ERROR'}, f"Erro ao buscar modelos: {e}")
+        return {'FINISHED'}
+
+
 class BO_OT_ExecutePrompt(bpy.types.Operator):
     bl_idname = "bo.execute_prompt"
     bl_label = "Execute Ollama Prompt"
@@ -42,7 +65,8 @@ class BO_OT_ExecutePrompt(bpy.types.Operator):
         context.scene.bo_is_processing = True
         self.report({'INFO'}, f"BenderOllama processando: {prompt}")
 
-        self._thread = threading.Thread(target=self._generate_in_thread, args=(prompt,))
+        model = context.scene.bo_selected_model or None
+        self._thread = threading.Thread(target=self._generate_in_thread, args=(prompt, model))
         self._thread.start()
 
         wm = context.window_manager
@@ -51,9 +75,9 @@ class BO_OT_ExecutePrompt(bpy.types.Operator):
 
         return {'RUNNING_MODAL'}
 
-    def _generate_in_thread(self, prompt):
+    def _generate_in_thread(self, prompt, model):
         try:
-            self._result = ollama_client.generate(prompt)
+            self._result = ollama_client.generate(prompt, model=model)
         except Exception as e:
             self._error = str(e)
         finally:
@@ -143,7 +167,7 @@ class BO_OT_OpenPopup(bpy.types.Operator):
                 layout.label(text=f"{status}: {item.prompt[:40]}{'...' if len(item.prompt) > 40 else ''}")
 
 
-classes = [BO_OT_TestConnection, BO_OT_ExecutePrompt, BO_OT_ClearHistory, BO_OT_OpenPopup]
+classes = [BO_OT_TestConnection, BO_OT_RefreshModels, BO_OT_ExecutePrompt, BO_OT_ClearHistory, BO_OT_OpenPopup]
 
 
 def register():

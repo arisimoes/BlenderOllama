@@ -61,7 +61,11 @@ class BenderOllamaHistoryItem(bpy.types.PropertyGroup):
     success: bpy.props.BoolProperty(name="Success", default=True)
 
 
-classes = [BenderOllamaHistoryItem]
+class BenderOllamaModelItem(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty(name="Model Name")
+
+
+classes = [BenderOllamaHistoryItem, BenderOllamaModelItem]
 
 
 def register():

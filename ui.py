@@ -15,6 +15,15 @@ class BENDER_OLLAMA_PT_Panel(bpy.types.Panel):
         layout.label(text="O que vamos construir, humano?", icon='CONSOLE')
         layout.prop(scene, "bo_prompt", text="")
 
+        # Model selection UI
+        box = layout.box()
+        box.label(text="Modelo", icon='PRESET')
+        row = box.row(align=True)
+        row.prop(scene, "bo_selected_model", text="")
+        row.operator("bo.refresh_models", text="", icon='FILE_REFRESH')
+        if scene.bo_available_models:
+            box.prop_search(scene, "bo_selected_model", scene, "bo_available_models", text="Escolher")
+
         row = layout.row()
         row.enabled = not scene.bo_is_processing
         row.operator("bo.execute_prompt", text="Executar Comando", icon='LIGHT_DATA')

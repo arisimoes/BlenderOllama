@@ -89,29 +89,29 @@ def generate(prompt: str, model: str | None = None, system: str | None = None) -
     return generate_ollama(prompt, model, system)
 
 
-def check_connection() -> str:
-    """Verify connectivity with the configured backend."""
+def list_models() -> list[str]:
+    """Return the list of model ids/names available on the configured backend."""
     prefs = get_preferences()
     base = _normalize_base_url(prefs.base_url)
 
     if prefs.backend == 'OPENAI':
         url = f"{base}/v1/models"
-        try:
-            result = _make_request(url, None, _default_headers(prefs), 5, method="GET")
-            models = [m.get("id", "?") for m in result.get("data", [])]
-            if models:
-                return f"Conectado! Modelos disponíveis: {', '.join(models[:5])}"
-            return "Conectado, mas nenhum modelo foi encontrado."
-        except Exception as e:
-            raise RuntimeError(f"Falha na conexão OpenAI-Compatible: {e}") from e
+        result = _make_request(url, None, _default_headers(prefs), 5, method="GET")
+        return [m.get("id", "?") for m in result.get("data", [])]
 
     # Ollama native
     url = f"{base}/api/tags"
+    result = _make_request(url, None, _default_headers(prefs), 5, method="GET")
+    return [m.get("name", "?") for m in result.get("models", [])]
+
+
+def check_connection() -> str:
+    """Verify connectivity with the configured backend."""
     try:
-        result = _make_request(url, None, _default_headers(prefs), 5, method="GET")
-        models = [m.get("name", "?") for m in result.get("models", [])]
+        models = list_models()
         if models:
             return f"Conectado! Modelos disponíveis: {', '.join(models[:5])}"
         return "Conectado, mas nenhum modelo foi encontrado."
     except Exception as e:
-        raise RuntimeError(f"Falha na conexão Ollama: {e}") from e
+        backend_name = "OpenAI-Compatible" if get_preferences().backend == 'OPENAI' else "Ollama"
+        raise RuntimeError(f"Falha na conexão {backend_name}: {e}") from e
