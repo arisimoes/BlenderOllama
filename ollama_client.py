@@ -7,7 +7,21 @@ import bpy
 
 
 def _image_to_base64(path: str) -> str | None:
-    """Return a base64 data URI for an image file, or None if path is empty/invalid."""
+    """Return a base64 string for an image file, or None if path is empty/invalid."""
+    if not path:
+        return None
+    p = pathlib.Path(path)
+    if not p.is_file():
+        return None
+    try:
+        data = p.read_bytes()
+        return base64.b64encode(data).decode('utf-8')
+    except Exception as e:
+        raise RuntimeError(f"Não foi possível ler a imagem {path}: {e}") from e
+
+
+def _image_to_data_uri(path: str) -> str | None:
+    """Return a data URI for OpenAI-compatible APIs, or None if path is empty/invalid."""
     if not path:
         return None
     p = pathlib.Path(path)
@@ -94,7 +108,7 @@ def generate_openai(prompt: str, model: str | None = None, system: str | None = 
     url = f"{_normalize_base_url(prefs.base_url)}/v1/chat/completions"
 
     content = [{"type": "text", "text": prompt}]
-    image_b64 = _image_to_base64(image_path) if image_path else None
+    image_b64 = _image_to_data_uri(image_path) if image_path else None
     if image_b64:
         content.append({"type": "image_url", "image_url": {"url": image_b64}})
 

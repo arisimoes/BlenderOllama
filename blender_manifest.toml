@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "blanderollama"
-name = "BenderOllama"
+name = "BlenderOllama"
 version = "0.1.2"
 tagline = "IA Local via Ollama para automação do Blender"
 maintainer = "arisimoes"
