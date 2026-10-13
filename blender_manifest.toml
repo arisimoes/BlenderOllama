@@ -1,0 +1,20 @@
+schema_version = "1.0.0"
+
+id = "blanderollama"
+name = "BenderOllama"
+version = "0.1.2"
+tagline = "IA Local via Ollama para automação do Blender"
+maintainer = "Você & AI"
+type = "add-on"
+
+blender_version_min = "5.2.0"
+
+license = [
+    "SPDX:MIT",
+]
+
+permissions = [
+    "network",
+]
+
+wheels = []
