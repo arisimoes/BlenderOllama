@@ -3,6 +3,53 @@ import threading
 from . import ollama_client, utils
 
 
+class BO_OT_CaptureViewport(bpy.types.Operator):
+    bl_idname = "bo.capture_viewport"
+    bl_label = "Capturar Viewport"
+    bl_description = "Tira um screenshot da viewport 3D e usa como imagem de referência"
+    bl_options = {'REGISTER'}
+
+    def execute(self, context):
+        import os
+        import tempfile
+
+        # Find the first 3D viewport area
+        area = None
+        for a in context.screen.areas:
+            if a.type == 'VIEW_3D':
+                area = a
+                break
+
+        if area is None:
+            self.report({'ERROR'}, "Nenhuma viewport 3D encontrada.")
+            return {'CANCELLED'}
+
+        # Ensure the temp directory exists
+        temp_dir = tempfile.gettempdir()
+        screenshot_path = os.path.join(temp_dir, "blenderollama_viewport.png")
+
+        # Save viewport screenshot using the space_image export API
+        try:
+            # Use bpy.ops.screen.screenshot_clipboard for copy, but save manually via area region
+            region = [r for r in area.regions if r.type == 'WINDOW'][0]
+            # Build context override dictionary for the operator
+            override = context.copy()
+            override['area'] = area
+            override['region'] = region
+            override['window'] = context.window
+            override['screen'] = context.screen
+
+            # Save screenshot to file using the viewport draw callback approach is complex,
+            # so we use bpy.ops.screen.screenshot_area which saves active area to path in Blender 5.x
+            bpy.ops.screen.screenshot_area(override, filepath=screenshot_path)
+            context.scene.bo_image_path = screenshot_path
+            self.report({'INFO'}, f"Viewport capturada: {screenshot_path}")
+        except Exception as e:
+            self.report({'ERROR'}, f"Falha ao capturar viewport: {e}")
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
 class BO_OT_PasteImagePath(bpy.types.Operator):
     bl_idname = "bo.paste_image_path"
     bl_label = "Colar Caminho da Imagem"
@@ -242,7 +289,7 @@ class BO_OT_OpenPopup(bpy.types.Operator):
                 layout.label(text=f"{status}: {item.prompt[:40]}{'...' if len(item.prompt) > 40 else ''}")
 
 
-classes = [BO_OT_TestConnection, BO_OT_RefreshModels, BO_OT_ExecutePrompt, BO_OT_PasteImagePath, BO_OT_ClearImagePath, BO_OT_RerunHistoryItem, BO_OT_ClearHistory, BO_OT_OpenPopup]
+classes = [BO_OT_TestConnection, BO_OT_RefreshModels, BO_OT_ExecutePrompt, BO_OT_CaptureViewport, BO_OT_PasteImagePath, BO_OT_ClearImagePath, BO_OT_RerunHistoryItem, BO_OT_ClearHistory, BO_OT_OpenPopup]
 
 
 def register():

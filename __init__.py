@@ -14,6 +14,7 @@ addon_classes = [
     operators.BO_OT_TestConnection,
     operators.BO_OT_RefreshModels,
     operators.BO_OT_ExecutePrompt,
+    operators.BO_OT_CaptureViewport,
     operators.BO_OT_PasteImagePath,
     operators.BO_OT_ClearImagePath,
     operators.BO_OT_RerunHistoryItem,

@@ -20,8 +20,11 @@ class BENDER_OLLAMA_PT_Panel(bpy.types.Panel):
         img_box.label(text="Imagem de Referência", icon='IMAGE')
         row = img_box.row(align=True)
         row.prop(scene, "bo_image_path", text="")
+        row.operator("bo.capture_viewport", text="", icon='RESTRICT_RENDER_OFF')
         row.operator("bo.paste_image_path", text="", icon='PASTEDOWN')
         row.operator("bo.clear_image_path", text="", icon='X')
+        if scene.bo_image_path and "blenderollama_viewport" in scene.bo_image_path:
+            img_box.label(text="Imagem: screenshot da viewport", icon='SCENE')
 
         # Model selection UI
         box = layout.box()
