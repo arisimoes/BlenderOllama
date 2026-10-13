@@ -1,16 +1,38 @@
 # BenderOllama
 
-IA Local via Ollama para automação do Blender — inspirado no BlenderGPT, mas executa modelos de linguagem 100% localmente no seu computador.
+IA para automação do Blender via Ollama local ou provedores OpenAI-compatible — inspirado no BlenderGPT, mas com suporte a modelos locais **e** modelos cloud como `kimi-k2.70code:cloud`.
+
+[![Release](https://img.shields.io/github/v/release/arisimoes/BlenderOllama)](https://github.com/arisimoes/BlenderOllama/releases/latest)
 
 ## O que faz
 
-BenderOllama adiciona uma aba lateral dentro do Blender. Você digita o que quer criar em linguagem natural, o add-on consulta o seu servidor local do Ollama, recebe código Python e executa automaticamente dentro do Blender.
+BenderOllama adiciona uma aba lateral dentro do Blender. Você digita o que quer criar em linguagem natural, o add-on consulta o modelo de IA escolhido, recebe código Python e executa automaticamente dentro do Blender — sem travar a interface.
+
+## Requisitos
+
+- **Blender 5.2 ou superior** (extensões do novo sistema de add-ons do Blender 5.x)
+- Ollama rodando localmente **ou** uma API key de provedor compatível com OpenAI
 
 ## Instalação
 
-### Opção A: Ollama local (grátis, 100% local)
+### 1. Baixe o add-on
 
-1. Baixe o Ollama em https://ollama.com.
+Vá até a [página de releases](https://github.com/arisimoes/BlenderOllama/releases/latest) e baixe o arquivo **`BenderOllama.zip`**.
+
+> Não baixe o código-fonte diretamente pelo botão verde `<> Code` — o zip da release já tem a estrutura correta para instalação no Blender.
+
+### 2. Instale no Blender 5.2
+
+1. Abra o Blender.
+2. Vá em **Edit > Preferences > Add-ons > Install Extension from Disk...**
+3. Selecione o `BenderOllama.zip` baixado.
+4. O add-on aparecerá em **Extensions > User Default**. Ative-o clicando na caixa de seleção.
+
+### 3. Configure o backend
+
+#### Opção A: Ollama local (grátis, 100% local)
+
+1. Baixe e instale o Ollama: https://ollama.com
 2. Baixe um modelo recomendado:
    ```bash
    ollama pull llama3
@@ -20,24 +42,19 @@ BenderOllama adiciona uma aba lateral dentro do Blender. Você digita o que quer
    ollama serve
    ```
 
-### Opção B: Provedor cloud compatível (Kimi, OpenRouter, Together, etc.)
+#### Opção B: Provedor cloud compatível (Kimi, OpenRouter, Together, etc.)
 
-1. Crie uma conta no provedor e gere uma API key.
+1. Crie uma conta no provedor e gere uma **API key**.
 2. Anote a **Base URL** e o nome exato do modelo.
-
-### Instale o add-on no Blender
-
-1. Faça o download deste repositório como `.zip`.
-2. No Blender, vá em **Edit > Preferences > Add-ons > Install from Disk...**
-3. Selecione o arquivo `.zip` do BenderOllama.
-4. Ative o add-on marcando a caixa de seleção.
 
 ## Uso
 
 1. Abra o painel lateral no 3D Viewport pressionando `N`.
-2. Clique na aba **BenderOllama**.
+2. Clique na aba **BenderOllama** (ou use **Object > BenderOllama** no menu superior).
 3. Digite o comando, por exemplo: `Crie um cubo no centro da cena com escala 2`.
 4. Clique em **Executar Comando**.
+
+O Blender mostrará uma barra de progresso enquanto o modelo processa a resposta. O código gerado é executado automaticamente na cena.
 
 ## Configuração
 
@@ -59,12 +76,14 @@ Use o botão **Testar Conexão** para verificar se a API está acessível.
 | Ollama local | Ollama Nativo | `http://localhost:11434` | `llama3` |
 | Kimi (Moonshot) | OpenAI-Compatible | `https://api.moonshot.cn` | `kimi-k2.70code:cloud` |
 | OpenRouter | OpenAI-Compatible | `https://openrouter.ai/api` | `qwen/qwen-2.5-coder:free` |
+| OpenAI | OpenAI-Compatible | `https://api.openai.com/v1` | `gpt-4o-mini` |
 
 ## Dicas de Prompt
 
 - Seja específico: "Crie 5 esferas distribuídas aleatoriamente na cena."
 - Mencione propriedades: "Crie um material vermelho e aplique ao objeto selecionado."
 - Para transformações: "Rotacione o objeto selecionado 45 graus no eixo Y."
+- O add-on mantém um histórico de comandos para você reutilizar ou consultar.
 
 ## Estrutura do Projeto
 
